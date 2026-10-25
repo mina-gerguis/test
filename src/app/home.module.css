@@ -1,0 +1,946 @@
+/* ============================================================
+   Cairo Map — Impeccable Homepage Styles
+   Design Mode: Persuade + Operate (High-Precision Discovery Hub)
+   Strictly scoped to Homepage
+   ============================================================ */
+
+.mainWrapper {
+  min-height: 100vh;
+  background-color: var(--color-bg, #090a0f);
+  color: var(--color-foreground, #f4f4f5);
+  font-family: var(--font-heading, "Cairo", sans-serif);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Background Atmosphere */
+.mainWrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1400px;
+  height: 600px;
+  background: radial-gradient(circle 800px at 50% -100px, rgba(0, 111, 238, 0.12), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   1. HERO SECTION
+   ───────────────────────────────────────────────────────────── */
+.heroSection {
+  position: relative;
+  z-index: 1;
+  padding: 64px 20px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heroContent {
+  max-width: 920px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.heroTitle {
+  font-family: var(--font-display, var(--font-heading));
+  font-size: clamp(2.2rem, 5.2vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-foreground, #ffffff);
+  margin-bottom: 20px;
+}
+
+.heroSubtitle {
+  font-family: var(--font-body, var(--font-sans));
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.75;
+  color: var(--text-secondary, #a1a1aa);
+  max-width: 760px;
+  margin: 0 auto 36px;
+  font-weight: 400;
+}
+
+/* Search Box Container */
+.searchBoxContainer {
+  max-width: 760px;
+  margin: 0 auto 28px;
+  position: relative;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: rgba(18, 20, 29, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  padding: 8px 18px 8px 14px;
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.searchBar:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.45);
+}
+
+.searchBarFocused {
+  border-color: var(--color-primary, #006fee) !important;
+  box-shadow: 0 0 0 4px rgba(0, 111, 238, 0.18), 0 16px 40px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.searchIcon {
+  font-size: 1.15rem;
+  color: var(--text-muted, #71717a);
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.searchBarFocused .searchIcon {
+  color: var(--color-primary, #006fee);
+}
+
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-foreground, #ffffff);
+  font-family: var(--font-heading, "Cairo", sans-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted, #71717a);
+  font-weight: 400;
+}
+
+.shortcutBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 5px 9px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.shortcutBadge:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.shortcutKbd {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-foreground, #ffffff);
+  line-height: 1;
+}
+
+.shortcutPlus {
+  font-size: 0.7rem;
+  color: var(--text-muted, #71717a);
+}
+
+/* Universal Live Search Dropdown */
+.searchDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  background-color: rgba(18, 20, 29, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px -8px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 100;
+  max-height: 480px;
+  overflow-y: auto;
+  text-align: right;
+  padding: 16px;
+  animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownSection {
+  margin-bottom: 18px;
+}
+
+.dropdownSection:last-child {
+  margin-bottom: 0;
+}
+
+.dropdownSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary, #006fee);
+  padding: 4px 8px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 8px;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: var(--color-foreground, #ffffff);
+  margin-bottom: 6px;
+  transition: all 0.18s ease;
+}
+
+.dropdownItem:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(-3px);
+}
+
+.dropdownItemLeading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdownItemTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.dropdownItemSubtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #a1a1aa);
+  margin-top: 2px;
+}
+
+.dropdownBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: rgba(0, 111, 238, 0.14);
+  color: var(--color-primary, #006fee);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.categoryPillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 6px;
+}
+
+.categoryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-foreground, #ffffff);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.18s ease;
+}
+
+.categoryPill:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dropdownNoResults {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+.dropdownFullSearchBtn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: var(--color-primary, #006fee);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.92rem;
+  font-family: var(--font-heading, "Cairo", sans-serif);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.dropdownFullSearchBtn:hover {
+  background-color: #005bc4;
+  transform: translateY(-1px);
+}
+
+/* Quick Transit & Access Chips */
+.quickTagsList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 860px;
+  margin: 0 auto 36px;
+}
+
+.quickTagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-foreground, #e4e4e7);
+  font-family: var(--font-body, "Cairo", sans-serif);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.quickTagChip:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.quickTagChip:active {
+  transform: translateY(0);
+}
+
+/* Cairo Weather Widget Container */
+.weatherWidgetWrapper {
+  max-width: 760px;
+  margin: 0 auto 36px;
+}
+
+/* Sponsored Ad Slider Container */
+.adSliderWrapper {
+  margin-top: 40px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. FAMOUS CITIES SECTION (المدن الشهيرة)
+   ───────────────────────────────────────────────────────────── */
+.citiesSection {
+  padding: 56px 20px 48px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display, var(--font-heading));
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  color: var(--color-foreground, #ffffff);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.sectionSubtitle {
+  font-family: var(--font-body, var(--font-sans));
+  font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+  color: var(--text-secondary, #a1a1aa);
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.citiesSliderTrack {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 8px 4px 16px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.citiesSliderTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.cityCard {
+  flex: 0 0 240px;
+  min-width: 240px;
+  height: 170px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  user-select: none;
+}
+
+.cityCard:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.6);
+}
+
+.cityCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.cityCard:hover .cityCardImage {
+  transform: scale(1.06);
+}
+
+.cityCardScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.45) 50%, rgba(0, 0, 0, 0.9) 100%);
+  pointer-events: none;
+}
+
+.cityCardBody {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  z-index: 2;
+  text-align: right;
+}
+
+.cityCardName {
+  font-family: var(--font-display, var(--font-heading));
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.cityCardMeta {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.78);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Slider Controls */
+.sliderControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.sliderArrowBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-foreground, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sliderArrowBtn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: scale(1.05);
+}
+
+.sliderArrowBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.sliderDotsGroup {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.sliderDot {
+  height: 6px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.sliderDotActive {
+  width: 22px;
+  background-color: var(--color-primary, #006fee);
+}
+
+.sliderDotInactive {
+  width: 6px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. SERVICES HUB (منظومة الخدمات وشبكات المواصلات)
+   ───────────────────────────────────────────────────────────── */
+.servicesSection {
+  padding: 64px 20px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 1024px) {
+  .servicesGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.serviceCard {
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.serviceCard:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.35);
+}
+
+.serviceCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.serviceCardIconWrapper {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+.serviceCard:hover .serviceCardIconWrapper {
+  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.serviceCardBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: rgba(0, 111, 238, 0.12);
+  color: var(--color-primary, #006fee);
+  border: 1px solid rgba(0, 111, 238, 0.2);
+}
+
+.serviceCardTitle {
+  font-family: var(--font-heading, "Cairo", sans-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-foreground, #ffffff);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.serviceCardDesc {
+  font-family: var(--font-body, var(--font-sans));
+  font-size: 0.92rem;
+  color: var(--text-secondary, #a1a1aa);
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+
+.serviceCardAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary, #006fee);
+  transition: gap 0.2s ease;
+}
+
+.serviceCard:hover .serviceCardAction {
+  gap: 12px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. CATEGORY DIRECTORY PREVIEW (تصفح حسب الفئة)
+   ───────────────────────────────────────────────────────────── */
+.categorySection {
+  padding: 64px 20px;
+  background-color: rgba(255, 255, 255, 0.015);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.categoryContainer {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .categoryGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .categoryGrid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+}
+
+.categoryTile {
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.categoryTile:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-3px);
+}
+
+.categoryTileIcon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.categoryTile:hover .categoryTileIcon {
+  transform: scale(1.1);
+}
+
+.categoryTileTitle {
+  font-family: var(--font-heading, "Cairo", sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-foreground, #ffffff);
+  line-height: 1.25;
+}
+
+.categoryTileCount {
+  font-size: 0.78rem;
+  color: var(--text-muted, #71717a);
+  font-family: var(--font-body, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. BLOG & ARTICLES SECTION (المدونة وأدلة التنقل)
+   ───────────────────────────────────────────────────────────── */
+.blogSection {
+  padding: 64px 20px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.blogHeaderRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.blogArticlesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 20px;
+}
+
+.blogCard {
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.22s ease;
+}
+
+.blogCard:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.3);
+}
+
+.blogCardCategory {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-secondary, #3b82f6);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.blogCardTitle {
+  font-family: var(--font-heading, "Cairo", sans-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-foreground, #ffffff);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.blogCardExcerpt {
+  font-family: var(--font-body, var(--font-sans));
+  font-size: 0.88rem;
+  color: var(--text-secondary, #a1a1aa);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.blogCardAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-secondary, #3b82f6);
+  transition: gap 0.2s ease;
+}
+
+.blogCard:hover .blogCardAction {
+  gap: 9px;
+}
+
+.browseAllBlogBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-foreground, #ffffff);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.browseAllBlogBtn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. AI PLANNER SPOTLIGHT (مخطط الرحلات الذكي)
+   ───────────────────────────────────────────────────────────── */
+.aiSection {
+  padding: 56px 20px;
+  background: radial-gradient(ellipse 600px 300px at 50% 50%, rgba(139, 92, 246, 0.08), transparent 70%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.aiContainer {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: 24px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aiRobotIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aiTitle {
+  font-family: var(--font-display, var(--font-heading));
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--color-foreground, #ffffff);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.aiSubtitle {
+  font-family: var(--font-body, var(--font-sans));
+  font-size: 1rem;
+  color: var(--text-secondary, #a1a1aa);
+  max-width: 680px;
+  margin: 0 auto 28px;
+  line-height: 1.7;
+}
+
+.aiCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 28px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 8px 24px -4px rgba(139, 92, 246, 0.4);
+  transition: all 0.22s ease;
+}
+
+.aiCtaBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -4px rgba(139, 92, 246, 0.55);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. PROPOSE PLACE CTA (إضافة مكان جديد)
+   ───────────────────────────────────────────────────────────── */
+.proposeSection {
+  padding: 64px 20px 80px;
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.proposeTitle {
+  font-family: var(--font-display, var(--font-heading));
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-weight: 800;
+  color: var(--color-foreground, #ffffff);
+  margin-bottom: 12px;
+}
+
+.proposeSubtitle {
+  font-family: var(--font-body, var(--font-sans));
+  font-size: 0.98rem;
+  color: var(--text-secondary, #a1a1aa);
+  max-width: 620px;
+  margin: 0 auto 26px;
+  line-height: 1.7;
+}
+
+.proposeCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 26px;
+  border-radius: 12px;
+  background-color: transparent;
+  border: 1.5px solid var(--color-primary, #006fee);
+  color: var(--color-primary, #006fee);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.proposeCtaBtn:hover {
+  background-color: rgba(0, 111, 238, 0.1);
+  transform: translateY(-1px);
+}

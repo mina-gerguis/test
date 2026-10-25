@@ -16,16 +16,28 @@ import {
   FaLightbulb,
   FaChevronLeft,
   FaChevronRight,
-  FaInbox
+  FaInbox,
+  FaBus,
+  FaTrain,
+  FaRoute,
+  FaBookOpen,
+  FaExternalLinkAlt
 } from "react-icons/fa";
 import { supabase } from "@/lib/supabase";
-import { initialPlaces, CATEGORIES_STRUCTURE, Place, normalizePlaceCategory, getMainCategoryImage } from "@/data/places";
+import {
+  initialPlaces,
+  CATEGORIES_STRUCTURE,
+  Place,
+  normalizePlaceCategory,
+  getMainCategoryImage
+} from "@/data/places";
 import dynamic from "next/dynamic";
 import AdSlider from "@/components/AdSlider";
-const TextLoop = dynamic(() => import("@/components/ui/TextLoop"), { ssr: false });
-const WeatherComfortWidget = dynamic(() => import("@/components/WeatherComfortWidget"), { ssr: false });
 import { FamousCity, INITIAL_FAMOUS_CITIES, getStoredCities, saveStoredCities } from "@/data/cities";
 import CityDetailModal from "@/components/cities/CityDetailModal";
+import styles from "./home.module.css";
+
+const WeatherComfortWidget = dynamic(() => import("@/components/WeatherComfortWidget"), { ssr: false });
 
 // ── 1. دالة توحيد وتنظيف النصوص العربية لبحث دقيق ──
 function normalizeArabic(text: string): string {
@@ -91,7 +103,7 @@ function mapDbPlaceToPlace(dbPlace: any): Place {
     name: dbPlace.name,
     name_en: dbPlace.name_en || "",
     category: finalCategory,
-    categoryLabel: dbPlace.category_label || finalCategory,
+    categoryLabel: dbPlace.category_label || defaultLabel || finalCategory,
     subCategories: finalSubCategories,
     place_type: dbPlace.place_type || "",
     governorate: dbPlace.governorate || "",
@@ -121,16 +133,7 @@ function mapDbPlaceToPlace(dbPlace: any): Place {
   };
 }
 
-// ── 3. دالة تنسيق عدد الأماكن المسجلة باللغة العربية ──
-function formatPlacesCount(count: number): string {
-  if (!count || count === 0) return "0 مكان مسجل";
-  if (count === 1) return "مكان واحد مسجل";
-  if (count === 2) return "مكانين مسجلين";
-  if (count >= 3 && count <= 10) return `${count} أماكن مسجلة`;
-  return `${count} مكان مسجل`;
-}
-
-// ── 4. فهرس خدمات وصفحات الموقع المباشرة (Site Services Index) ──
+// ── 3. فهرس خدمات وصفحات الموقع المباشرة (Site Services Index) ──
 interface SiteServiceItem {
   id: string;
   label: string;
@@ -148,13 +151,13 @@ const SITE_SERVICES: SiteServiceItem[] = [
     subtitle: "حفظ موقعك الحالي بدقة 100% ورابط خرائط جوجل",
     href: "/save-location",
     icon: "cairo.webp",
-    badge: "ميزة جديدة 🎯",
+    badge: "ميزة ذكية 🎯",
     keywords: ["احفظ مكاني", "احفظ مكاني الحالي", "مكان ركنتي", "ركنة عربيتي", "موقعي", "حفظ الموقع", "google maps", "خرائط جوجل", "احفظ مكان", "gps", "save location"]
   },
   {
     id: "metro",
     label: "خريطة مترو الأنفاق",
-    subtitle: "خطوط مترو القاهرة الكبري.",
+    subtitle: "خطوط ومحطات مترو القاهرة الكبرى",
     href: "/metro",
     icon: "metro.webp",
     badge: "مواصلات المترو",
@@ -163,7 +166,7 @@ const SITE_SERVICES: SiteServiceItem[] = [
   {
     id: "monorail",
     label: "قطار المونوريل",
-    subtitle: "محطات وأسعار تذاكر المونوريل",
+    subtitle: "محطات ومسار قطار المونوريل المعلق",
     href: "/monorail",
     icon: "Cairo_monorail_east.webp",
     badge: "قطار معلق",
@@ -171,7 +174,7 @@ const SITE_SERVICES: SiteServiceItem[] = [
   },
   {
     id: "lrt",
-    label: "القطار الكهربائي الخفيف",
+    label: "القطار الكهربائي الخفيف LRT",
     subtitle: "محطات ومواعيد القطار الكهربائي",
     href: "/lrt",
     icon: "Cairo_lrt.webp",
@@ -190,16 +193,16 @@ const SITE_SERVICES: SiteServiceItem[] = [
   {
     id: "railways",
     label: "قطارات السكك الحديدية",
-    subtitle: "قطارات القاهرة والصعيد",
+    subtitle: "مواعيد وقطارات القاهرة والمحافظات",
     href: "/railways",
     icon: "Cairo_train.webp",
-    badge: "قطارات مصر",
+    badge: "سكك حديد مصر",
     keywords: ["قطار", "قطارات", "سكك حديد", "سكك حديد مصر", "محطة رمسيس", "رمسيس", "قطار الصعيد", "قطار اسكندرية"]
   },
   {
     id: "directory",
     label: "دليل الهاتف والأكواد",
-    subtitle: "أرقام الخدمات، وأكواد الشبكات",
+    subtitle: "أرقام الطوارئ وأكواد شبكات المحمول",
     href: "/directory",
     icon: "cairo.webp",
     badge: "دليل الهواتف",
@@ -207,8 +210,8 @@ const SITE_SERVICES: SiteServiceItem[] = [
   },
   {
     id: "directions",
-    label: "ازاي اروح؟",
-    subtitle: "دليل الوصول لأي مكان في مصر",
+    label: "ازاي اروح والمواقف",
+    subtitle: "دليل الوصول لأي وجهة في مصر",
     href: "/directions",
     icon: "arab_republic _of_egypt.webp",
     badge: "اتجاهات ومسارات",
@@ -234,8 +237,8 @@ const SITE_SERVICES: SiteServiceItem[] = [
   },
   {
     id: "microbus-stations",
-    label: "مواقف السرفيس",
-    subtitle: "خطوط السرفيس بين المحافظات",
+    label: "مواقف السرفيس والميكروباص",
+    subtitle: "خطوط ومواقف السرفيس بين المحافظات",
     href: "/microbus-stations",
     icon: "microbus.webp",
     badge: "مواقف ميكروباص",
@@ -244,7 +247,7 @@ const SITE_SERVICES: SiteServiceItem[] = [
   {
     id: "airports",
     label: "المطارات المصرية",
-    subtitle: "معلومات مطار القاهرة ",
+    subtitle: "معلومات مطار القاهرة والمطارات الدولية",
     href: "/airports",
     icon: "airport.webp",
     badge: "مطارات وموانئ",
@@ -253,11 +256,11 @@ const SITE_SERVICES: SiteServiceItem[] = [
   {
     id: "ports",
     label: "الموانئ المصرية",
-    subtitle: "معلومات ميناء السخنة ",
+    subtitle: "دليل الموانئ المصرية والملاحية",
     href: "/ports",
     icon: "arab_republice.webp",
     badge: "الموانئ",
-    keywords: ["ميناء", "الميناء", "ميناء السخنة"]
+    keywords: ["ميناء", "الميناء", "ميناء السخنة", "ميناء الاسكندرية"]
   },
   {
     id: "blog",
@@ -298,9 +301,9 @@ const DEFAULT_HOME_BLOGS: HomeBlogItem[] = [
     id: "sample-3",
     title: "كيف تستخدم محطة القطار الكهربائي LRT بالكامل مع أسعار التذاكر",
     slug: "lrt-train-full-guide",
-    category: "مترو ومنوريل",
-    excerpt: "كل ما تحتاج معرفته عن محطات القطار الكهربائي LRT من عدلي منصور حتى العاصمة الإدارية.",
-  },
+    category: "الترانزيت والقطارات",
+    excerpt: "دليلك الشامل لخطوات استقلال LRT ومحطات التبادل مع الخط الثالث للمترو.",
+  }
 ];
 
 export default function HomePage() {
@@ -314,18 +317,13 @@ export default function HomePage() {
   // ── حساب الإحصائيات الحقيقية والديناميكية للموقع ──
   const [activePlaces, setActivePlaces] = useState<Place[]>(initialPlaces);
   const [placesCount, setPlacesCount] = useState<number>(initialPlaces.length);
-  const [phonesCount, setPhonesCount] = useState<number>(() => {
-    return initialPlaces.reduce((sum, p) => sum + (p.phones?.length || 0), 0);
-  });
-  const [transitCount] = useState<number>(4);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [homeBlogs, setHomeBlogs] = useState<HomeBlogItem[]>(DEFAULT_HOME_BLOGS);
   const [famousCities, setFamousCities] = useState<FamousCity[]>([]);
   const [selectedCityModal, setSelectedCityModal] = useState<FamousCity | null>(null);
   const [citiesScrollProgress, setCitiesScrollProgress] = useState(0);
-  const [isDraggingMicroTrack, setIsDraggingMicroTrack] = useState(false);
+
   const citiesScrollRef = useRef<HTMLDivElement>(null);
-  const microTrackRef = useRef<HTMLDivElement>(null);
 
   // Mouse drag to scroll states for cities section
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -362,7 +360,7 @@ export default function HomePage() {
     if (!isMouseDown || !citiesScrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - citiesScrollRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    const walk = (x - startX) * 1.5;
     if (Math.abs(walk) > 5) {
       setDragMoved(true);
     }
@@ -377,7 +375,7 @@ export default function HomePage() {
     if (citiesScrollRef.current) {
       const container = citiesScrollRef.current;
       const isRtl = getComputedStyle(container).direction === "rtl";
-      const scrollAmount = 280; // card width (260px) + gap (20px)
+      const scrollAmount = 260;
       container.scrollBy({
         left: isRtl ? scrollAmount : -scrollAmount,
         behavior: "smooth",
@@ -389,7 +387,7 @@ export default function HomePage() {
     if (citiesScrollRef.current) {
       const container = citiesScrollRef.current;
       const isRtl = getComputedStyle(container).direction === "rtl";
-      const scrollAmount = 280; // card width (260px) + gap (20px)
+      const scrollAmount = 260;
       container.scrollBy({
         left: isRtl ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -408,65 +406,7 @@ export default function HomePage() {
     }
   };
 
-  const handleTrackPointerMove = (clientX: number) => {
-    if (!microTrackRef.current || !citiesScrollRef.current) return;
-    const rect = microTrackRef.current.getBoundingClientRect();
-    const ratioFromRight = Math.min(1, Math.max(0, (rect.right - clientX) / rect.width));
-
-    const container = citiesScrollRef.current;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    if (maxScroll > 0) {
-      const targetScroll = ratioFromRight * maxScroll;
-      // In RTL (Arabic) Chrome/Edge/Firefox, scrollLeft goes negative when scrolling left
-      container.scrollLeft = -targetScroll;
-      if (Math.abs(container.scrollLeft) === 0 && targetScroll > 0) {
-        container.scrollLeft = targetScroll;
-      }
-      setCitiesScrollProgress(ratioFromRight);
-    }
-  };
-
-  const handleTrackMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsDraggingMicroTrack(true);
-    handleTrackPointerMove(e.clientX);
-  };
-
-  const handleTrackTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length > 0) {
-      handleTrackPointerMove(e.touches[0].clientX);
-    }
-  };
-
-  const handleTrackTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length > 0) {
-      handleTrackPointerMove(e.touches[0].clientX);
-    }
-  };
-
   useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (isDraggingMicroTrack) {
-        handleTrackPointerMove(e.clientX);
-      }
-    };
-    const handleGlobalMouseUp = () => {
-      if (isDraggingMicroTrack) {
-        setIsDraggingMicroTrack(false);
-      }
-    };
-
-    if (isDraggingMicroTrack) {
-      window.addEventListener("mousemove", handleGlobalMouseMove);
-      window.addEventListener("mouseup", handleGlobalMouseUp);
-    }
-    return () => {
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, [isDraggingMicroTrack]);
-
-  useEffect(() => {
-    // Run initial check and when famousCities updates
     const timer = setTimeout(() => {
       handleCitiesScroll();
     }, 150);
@@ -485,7 +425,6 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true;
 
-    // Refresh local cities on cities_updated event
     const handleCitiesUpdated = () => {
       if (isMounted) {
         setFamousCities(getStoredCities());
@@ -497,13 +436,11 @@ export default function HomePage() {
       try {
         let currentPlaces: Place[] = [...initialPlaces];
 
-        // 1. Fetch cities locally first
         if (isMounted) {
           setFamousCities(getStoredCities());
         }
 
         if (supabase) {
-          // جلب المدن الشهيرة والمعالم السياحية بشكل منفصل ثم دمجهما برمجياً لتجنب مشاكل الـ Foreign Key cache في Supabase
           const { data: dbCities, error: citiesErr } = await supabase
             .from("famous_cities")
             .select("*")
@@ -514,7 +451,6 @@ export default function HomePage() {
             .select("*");
 
           if (!citiesErr && dbCities && dbCities.length > 0) {
-            // تجميع المعالم السياحية حسب معرّف المدينة
             const landmarksByCity: Record<string, any[]> = {};
             if (dbLandmarks) {
               dbLandmarks.forEach((lm: any) => {
@@ -558,29 +494,11 @@ export default function HomePage() {
             }
           }
 
-          // جلب الأماكن الحية المباشرة من جدول places بـ Supabase لموافق الدليل رسمياً
           const { data: dbPlaces, error } = await supabase.from("places").select("*, branches(*)");
-          if (!error && dbPlaces) {
-            if (dbPlaces.length > 0) {
-              currentPlaces = dbPlaces.map(mapDbPlaceToPlace);
-            } else {
-              currentPlaces = [];
-            }
+          if (!error && dbPlaces && dbPlaces.length > 0) {
+            currentPlaces = dbPlaces.map(mapDbPlaceToPlace);
           }
 
-          // جلب عدد هواتف وأكواد التليفون من Supabase
-          const { count: phoneDirCount } = await supabase
-            .from("phone_directory")
-            .select("id", { count: "exact", head: true });
-
-          const { count: telecomCount } = await supabase
-            .from("telecom_codes")
-            .select("id", { count: "exact", head: true });
-
-          let totalPhones = currentPlaces.reduce((sum, p) => sum + (p.phones?.length || 0), 0);
-          totalPhones += (phoneDirCount || 0) + (telecomCount || 0);
-
-          // جلب أحدث 3 مقالات منشورة من Supabase (أي مقال جديد يضاف يظهر فوراً في الرئيسية)
           const { data: dbBlogs, error: blogsErr } = await supabase
             .from("blogs")
             .select("id, title, slug, excerpt, category, created_at")
@@ -598,13 +516,8 @@ export default function HomePage() {
               setHomeBlogs(mergedBlogs);
             }
           }
-
-          if (isMounted) {
-            setPhonesCount(totalPhones);
-          }
         }
 
-        // حساب عدد الأماكن الفعلي الدقيق المسجل لكل فئة
         const counts: Record<string, number> = {};
         CATEGORIES_STRUCTURE.forEach(mainCat => {
           const subCatNames = new Set(mainCat.subCategories.map(s => s.name));
@@ -636,7 +549,6 @@ export default function HomePage() {
     };
   }, []);
 
-  // ── إغلاق القائمة المنسدلة عند النقر خارج شريط البحث ──
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -649,18 +561,15 @@ export default function HomePage() {
     };
   }, []);
 
-  // Detect if user is on macOS
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsMac(/Mac|iPod|iPhone|iPad/.test(navigator.userAgent));
     }
   }, []);
 
-  // Global Ctrl+K / Cmd+K listener to focus the homepage search input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      // Do not override shortcut if focused on another text input/textarea
       if (
         target &&
         (target.tagName === "INPUT" ||
@@ -684,7 +593,7 @@ export default function HomePage() {
 
   const queryWords = getSearchWords(searchQuery);
 
-  // ── 5. فلترة خدمات الموقع المطابقة للبحث ──
+  // فلترة خدمات الموقع المطابقة للبحث
   const matchedServices = searchQuery.trim() && queryWords.length > 0
     ? SITE_SERVICES.filter(service => {
       const serviceText = getSearchCleanedText([
@@ -697,7 +606,7 @@ export default function HomePage() {
     })
     : [];
 
-  // ── 6. فلترة الأماكن والمحلات الحية في دليل الأماكن ──
+  // فلترة الأماكن والمحلات
   const matchedPlaces: Place[] = searchQuery.trim() && queryWords.length > 0
     ? activePlaces.filter(place => {
       const categoryLabels: Record<string, string> = {};
@@ -734,7 +643,7 @@ export default function HomePage() {
     }).slice(0, 5)
     : [];
 
-  // ── 7. فلترة الفئات الرئيسية والفرعية ──
+  // فلترة الفئات
   const matchedCategories = searchQuery.trim() && queryWords.length > 0
     ? CATEGORIES_STRUCTURE.filter(cat => {
       const categorySearchable = getSearchCleanedText([
@@ -770,184 +679,129 @@ export default function HomePage() {
       }
     }
 
-    // Keep dropdown open instead of redirecting to /places
     setIsDropdownOpen(true);
   };
 
   const quickSearchTags = [
-    { label: "موناريل", route: "/monorail", icon: "Cairo_monorail_east.webp" },
-    { label: "الأتوبيس الترددي", route: "/brt", icon: "brt.webp" },
-    { label: "القطار الكهربي", route: "/lrt", icon: "Cairo_lrt.webp" },
-    { label: "موقف الميكروباصات", route: "/microbus-stations", icon: "microbus.webp" },
-    { label: "موقف الأتوبيسات", route: "/bus-stations", icon: "bus.webp" },
-    { label: "مدونة المقالات", route: "/blog", icon: "Cairo_logo.webp" },
     { label: "خريطة المترو", route: "/metro", icon: "metro.webp" },
-    { label: "دليل الهواتف", route: "/directory", icon: "cairo.webp" },
+    { label: "مونوريل العاصمة", route: "/monorail", icon: "Cairo_monorail_east.webp" },
+    { label: "الأتوبيس الترددي BRT", route: "/brt", icon: "brt.webp" },
+    { label: "القطار الكهربائي LRT", route: "/lrt", icon: "Cairo_lrt.webp" },
+    { label: "سكك حديد مصر", route: "/railways", icon: "Cairo_train.webp" },
+    { label: "مواقف السرفيس", route: "/microbus-stations", icon: "microbus.webp" },
+    { label: "مواقف الأتوبيسات", route: "/bus-stations", icon: "bus.webp" },
+    { label: "أحفظ مكاني (GPS)", route: "/save-location", icon: "cairo.webp" },
+    { label: "دليل الهواتف والأكواد", route: "/directory", icon: "cairo.webp" },
     { label: "ازاي اروح؟", route: "/directions", icon: "arab_republic _of_egypt.webp" },
   ];
 
   const mainServices = [
     {
+      id: "transit",
+      title: "شبكات مترو القاهرة الكبرى",
+      desc: "خرائط تفاعلية شاملة لخطوط مترو الأنفاق الثلاثة مع محطات التبادل ومسارات الانتقال السريعة.",
+      icon: "metro",
+      link: "/metro",
+      badge: "النقل السريع",
+    },
+    {
       id: "save-location",
       title: "أحفظ مكاني (GPS دقيق)",
-      desc: "احفظ مكان تواجدك أو ركنة سيارتك بدقة 100% بالميلي مع تسجيل الوقت والتاريخ ورابط مباشر لخرائط Google Maps.",
+      desc: "سجّل موقعك الحالي أو مكان ركنتك بدقة تامة بالميلي مع حفظ التوقيت والرجوع عبر خرائط Google.",
       icon: "street",
       link: "/save-location",
+      badge: "ميزة ذكية",
     },
     {
       id: "places",
-      title: "دليل الأماكن",
-      desc: "استكشف المطاعم، الكافيهات، الأطباء، والمحلات في القاهرة والجيزة مع مواعيد العمل الرسمية، الفروع، وأرقام الهواتف.",
+      title: "دليل الأماكن والخدمات",
+      desc: "استكشف المطاعم، العيادات، المحلات، والكافيهات مع مواعيد العمل، تقييمات الزوار، وأرقام التواصل.",
       icon: "restaurant",
       link: "/places",
-    },
-    {
-      id: "blog",
-      title: "مدونة ومقالات خريطة القاهرة",
-      desc: "أحدث النصائح، خطوط السفر، وأدلة التنقل الذكي وأماكن الخروج في القاهرة والجيزة المحدثة باستمرار.",
-      icon: "book",
-      link: "/blog",
+      badge: "الدليل المحدث",
     },
     {
       id: "ai-planner",
-      title: "مخطط الرحلات الذكي (AI)",
-      desc: "صمّم خطة خروجة أو يوم كامل بالذكاء الاصطناعي بناءً على ميزانيتك، اهتماماتك الشخصية، والمنطقة التي تفضلها.",
+      title: "مخطط الرحلات الذكي",
+      desc: "صمّم برنامج خروجتك بالكامل بنقرة واحدة وفق ميزانيتك، عدد أفراد عائلتك، والمنطقة المفضلة.",
       icon: "robot",
       link: "/ai-planner",
-    },
-    {
-      id: "directory",
-      title: "دليل الهواتف والأكواد",
-      desc: "دليل شامل لأرقام الطوارئ، الهيئات الخدمية، وأكواد باقات وفليكسات شبكات المحمول (فودافون، أورنج، اتصالات، وي).",
-      icon: "phone",
-      link: "/directory",
-    },
-    {
-      id: "transit",
-      title: "شبكات مترو القاهرة الكبري",
-      desc: "خرائط تفاعلية لخطوط مترو الأنفاق الخط الأول و الثاني و الثالث.",
-      icon: "metro",
-      link: "/metro",
+      badge: "ذكاء اصطناعي",
     },
     {
       id: "directions",
       title: "دليل ازاي اروح والمواقف",
-      desc: "اعثر على طريقة الوصول لأي مكان في مصر بسهولة مع مواقف الأتوبيس، الميكروباص، المطارات، والموانئ.",
+      desc: "خارطة طريق كاملة لأي مكان بمصر مع محطات الأتوبيس، السرفيس، القطارات، والمطارات.",
       icon: "egypt",
       link: "/directions",
+      badge: "المسارات والمواقف",
+    },
+    {
+      id: "directory",
+      title: "دليل الهواتف والأكواد",
+      desc: "أرقام الطوارئ، الخدمات الحكومية، وأكواد باقات وفليكسات شبكات المحمول المصرية.",
+      icon: "phone",
+      link: "/directory",
+      badge: "أرقام وأكواد",
     },
     {
       id: "microbus-stations",
-      title: "مواقف الميكروباص",
-      desc: "دليل مواقف الميكروباص في القاهرة الكبري و الجيزة  وجميع المحافظات المصرية",
+      title: "مواقف السرفيس والميكروباص",
+      desc: "دليل تفصيلي لمواقف وخطوط السرفيس بين مناطق القاهرة الكبرى ومحافظات الوجهين البحري والقبلي.",
       icon: "microbus",
       link: "/microbus-stations",
+      badge: "بين المحافظات",
+    },
+    {
+      id: "blog",
+      title: "مدونة وأدلة ماب القاهرة",
+      desc: "أحدث المقالات الميدانية، نصائح الترانزيت، واقتراحات أماكن التنزه الهادئة والحيوية.",
+      icon: "book",
+      link: "/blog",
+      badge: "أدلة وقصص",
     },
     {
       id: "propose",
       title: "إضافة واقتراح مكان جديد",
-      desc: "هل تملك نشاطاً تجارياً أو تريد إضافة مكان جديد على دليل ماب القاهرة؟ أضفه مجاناً ليصل لملايين الزوار.",
+      desc: "هل تملك نشاطاً تجارياً أو تريد توثيق مكان جديد؟ أضف بياناتك مجاناً لتصل لآلاف الزوار يومياً.",
       icon: "store",
       link: "/propose-place",
+      badge: "مجتمع الدليل",
     },
   ];
-
 
   const categoryCards = CATEGORIES_STRUCTURE;
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "var(--color-bg)", color: "var(--color-foreground)", fontFamily: "var(--font-heading)" }}>
+    <main className={styles.mainWrapper}>
       {/* ── 1. HERO SECTION ── */}
-      <section style={{
-        position: "relative",
-        padding: "60px 20px 80px 20px",
-        paddingBottom: "20px",
-        overflow: "visible",
-        background: "radial-gradient(circle at 50% 0%, rgba(0, 111, 238, 0.15) 0%, rgba(0,0,0,0) 70%)",
-      }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", textAlign: "center" }}>
-          {/* Badge */}
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "8px 18px",
-            borderRadius: "999px",
-            backgroundColor: "var(--bg-glass-card)",
-            border: "1px solid var(--border-glass-bright)",
-            fontSize: "0.9rem",
-            color: "var(--color-primary)",
-            marginBottom: "24px",
-            fontFamily: "var(--font-display)",
-            fontWeight: "500"
-          }}>
-            <span>✨</span>
-            <span>دليلك الذكي الشامل لشوارع وأماكن القاهرة</span>
-          </div>
-
-          {/* Title */}
-          <h1 style={{
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            fontWeight: "700",
-            lineHeight: "1.25",
-            marginBottom: "20px",
-            letterSpacing: "-0.5px",
-          }}>
-            استكشف مصر  وتنقّل بذكاء وسرعة ودقة متناهية
+      <section className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            دليل القاهرة الذكي — كل مكان وطريق ومواصلة بدقة متناهية
           </h1>
 
-          {/* Subtitle */}
-          <p
-            className="sub-title"
-            style={{
-              fontSize: "clamp(1rem, 2vw, 1.25rem)",
-              color: "var(--text-secondary)",
-              maxWidth: "780px",
-              margin: "0 auto 36px auto",
-              lineHeight: "1.7",
-              fontWeight: "400",
-            }}>
-            منصتك المتكاملة لاستكشاف أماكن المطاعم، الكافيهات، العيادات، شبكات المترو والمنورايل، خطوط المواصلات، ودليل الهواتف والأكواد المختصرة.
+          <p className={styles.heroSubtitle}>
+            منصتك المتكاملة لاستكشاف المطاعم والعيادات، شبكات المترو والمونوريل، خطوط المواصلات الحية، ودليل الهواتف وأرقام الطوارئ في مصر.
           </p>
 
-          {/* Hero Universal Live Search Box Container */}
-          <div ref={searchContainerRef} style={{
-            maxWidth: "720px",
-            margin: "0 auto 28px auto",
-            position: "relative"
-          }}>
+          {/* Search Box */}
+          <div ref={searchContainerRef} className={styles.searchBoxContainer}>
             <form onSubmit={(e) => handleSearchSubmit(e, false)}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "var(--bg-glass)",
-                border: isDropdownOpen && searchQuery.trim() ? "1.5px solid var(--color-primary)" : "1.5px solid var(--border-primary)",
-                borderRadius: "var(--ra-32)",
-                padding: "8px 15px 8px 15px",
-                boxShadow: "0 10px 30px var(--shadow-card)",
-                backdropFilter: "blur(12px)",
-                transition: "border-color 0.2s ease"
-              }}>
-                <FaSearch style={{ fontSize: "1.2rem", color: "var(--text-muted)", marginLeft: "12px" }} />
+              <div className={`${styles.searchBar} ${isDropdownOpen && searchQuery.trim() ? styles.searchBarFocused : ""}`}>
+                <FaSearch className={styles.searchIcon} />
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="ابحث عن الخدمة المطلوبة "
+                  placeholder="ابحث عن محطة، مطعم، خدمة، أو كود شبكة..."
                   value={searchQuery}
                   onFocus={() => setIsDropdownOpen(true)}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setIsDropdownOpen(true);
                   }}
-                  style={{
-                    flex: 1,
-                    background: "transparent",
-                    border: "none",
-                    outline: "none",
-                    color: "var(--color-foreground)",
-                    fontSize: "1rem",
-                    fontFamily: "var(--font-heading)"
-                  }}
+                  className={styles.searchInput}
+                  aria-label="ابحث في دليل ماب القاهرة"
                 />
                 <button
                   type="button"
@@ -955,81 +809,25 @@ export default function HomePage() {
                     searchInputRef.current?.focus();
                     setIsDropdownOpen(true);
                   }}
-                  style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.07)",
-                    border: "1px solid var(--border-glass)",
-                    backdropFilter: "blur(8px)",
-                    borderRadius: "var(--ra-14)",
-                    padding: "4px 8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    cursor: "pointer",
-                    transition: "var(--transition-smooth)",
-                    userSelect: "none",
-                    outline: "none",
-                    height: "36px",
-                  }}
+                  className={styles.shortcutBadge}
+                  title="اضغط للتركيز على البحث"
                 >
-                  <kbd style={{
-                    fontFamily: "inherit",
-                    fontSize: "0.75rem",
-                    fontWeight: "bold",
-                    color: "var(--color-foreground)",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minWidth: "20px"
-                  }}>K</kbd>
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: "bold" }}>+</span>
-                  <kbd style={{
-                    fontFamily: "inherit",
-                    fontSize: "0.75rem",
-                    fontWeight: "bold",
-                    color: "var(--color-foreground)",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minWidth: "20px"
-                  }}>{isMac ? "⌘" : "Ctrl"}</kbd>
+                  <kbd className={styles.shortcutKbd}>{isMac ? "⌘" : "Ctrl"}</kbd>
+                  <span className={styles.shortcutPlus}>+</span>
+                  <kbd className={styles.shortcutKbd}>K</kbd>
                 </button>
               </div>
             </form>
 
-            {/* ── UNIVERSAL LIVE SEARCH DROPDOWN ── */}
+            {/* Universal Live Search Dropdown */}
             {isDropdownOpen && searchQuery.trim().length > 0 && (
-              <div style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                left: 0,
-                right: 0,
-                backgroundColor: "var(--cardGlassBg)",
-                backdropFilter: "blur(20px)",
-                border: "1px solid var(--border-glass-bright)",
-                borderRadius: "var(--ra-24)",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-                zIndex: 100,
-                maxHeight: "450px",
-                overflowY: "auto",
-                textAlign: "right",
-                padding: "12px"
-              }}>
-
-                {/* 1. MATCHED SITE SERVICES (هل تقصد؟) */}
+              <div className={styles.searchDropdown}>
+                {/* 1. MATCHED SITE SERVICES */}
                 {matchedServices.length > 0 && (
-                  <div style={{ marginBottom: "16px" }}>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontSize: "0.85rem",
-                      fontWeight: "700",
-                      color: "var(--color-primary)",
-                      padding: "6px 12px",
-                      marginBottom: "6px"
-                    }}>
+                  <div className={styles.dropdownSection}>
+                    <div className={styles.dropdownSectionHeader}>
                       <FaLightbulb />
-                      <span>هل تقصد صفحة أو خدمة بالموقع؟</span>
+                      <span>خدمات وصفحات سريعة بالموقع</span>
                     </div>
 
                     {matchedServices.map((service) => (
@@ -1037,45 +835,23 @@ export default function HomePage() {
                         key={service.id}
                         href={service.href}
                         onClick={() => setIsDropdownOpen(false)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "10px 14px",
-                          borderRadius: "var(--ra-18)",
-                          backgroundColor: "var(--hoverBtn)",
-                          border: "1px solid var(--border-glass)",
-                          marginBottom: "6px",
-                          textDecoration: "none",
-                          color: "var(--color-foreground)",
-                          transition: "var(--transition-fast)"
-                        }}
+                        className={styles.dropdownItem}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div className={styles.dropdownItemLeading}>
                           <Image
                             src={`/images/icons2d/${service.icon}`}
                             alt={service.label}
-                            width={30}
-                            height={30}
-                            style={{ width: "30px", height: "30px", objectFit: "contain" }}
+                            width={28}
+                            height={28}
+                            style={{ width: "28px", height: "28px", objectFit: "contain" }}
                           />
                           <div>
-                            <div style={{ fontWeight: "700", fontSize: "0.95rem" }}>{service.label}</div>
-                            <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>{service.subtitle}</div>
+                            <div className={styles.dropdownItemTitle}>{service.label}</div>
+                            <div className={styles.dropdownItemSubtitle}>{service.subtitle}</div>
                           </div>
                         </div>
 
-                        <span style={{
-                          fontSize: "0.75rem",
-                          fontWeight: "700",
-                          padding: "3px 10px",
-                          borderRadius: "999px",
-                          backgroundColor: "rgba(0, 111, 238, 0.15)",
-                          color: "var(--color-primary)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "4px"
-                        }}>
+                        <span className={styles.dropdownBadge}>
                           <span>انتقال</span>
                           <FaChevronLeft style={{ fontSize: "0.65rem" }} />
                         </span>
@@ -1086,19 +862,10 @@ export default function HomePage() {
 
                 {/* 2. MATCHED PLACES */}
                 {matchedPlaces.length > 0 && (
-                  <div style={{ marginBottom: "16px" }}>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontSize: "0.85rem",
-                      fontWeight: "700",
-                      color: "var(--accent-secondary)",
-                      padding: "6px 12px",
-                      marginBottom: "6px"
-                    }}>
+                  <div className={styles.dropdownSection}>
+                    <div className={styles.dropdownSectionHeader} style={{ color: "var(--accent-secondary, #10b981)" }}>
                       <FaMapMarkerAlt />
-                      <span>الأماكن ذات الصلة ({matchedPlaces.length})</span>
+                      <span>الأماكن المطابقة ({matchedPlaces.length})</span>
                     </div>
 
                     {matchedPlaces.map((place) => (
@@ -1106,30 +873,18 @@ export default function HomePage() {
                         key={place.id}
                         href={`/places/${place.id}`}
                         onClick={() => setIsDropdownOpen(false)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "10px 14px",
-                          borderRadius: "var(--ra-18)",
-                          backgroundColor: "var(--hoverBtn)",
-                          border: "1px solid var(--border-glass)",
-                          marginBottom: "6px",
-                          textDecoration: "none",
-                          color: "var(--color-foreground)",
-                          transition: "var(--transition-fast)"
-                        }}
+                        className={styles.dropdownItem}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div className={styles.dropdownItemLeading}>
                           <Image
                             src={getMainCategoryImage(place.category, place.subCategories)}
                             alt={place.name}
-                            width={30}
-                            height={30}
-                            style={{ width: "30px", height: "30px", objectFit: "contain" }}
+                            width={28}
+                            height={28}
+                            style={{ width: "28px", height: "28px", objectFit: "contain" }}
                           />
                           <div>
-                            <div style={{ fontWeight: "700", fontSize: "0.95rem" }}>
+                            <div className={styles.dropdownItemTitle}>
                               {place.name}
                               {place.name_en && (
                                 <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginRight: "6px", fontWeight: "normal" }}>
@@ -1137,7 +892,7 @@ export default function HomePage() {
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                            <div className={styles.dropdownItemSubtitle}>
                               {place.categoryLabel} {place.briefLocation ? `• ${place.briefLocation}` : ""}
                             </div>
                           </div>
@@ -1150,41 +905,27 @@ export default function HomePage() {
 
                 {/* 3. MATCHED CATEGORIES */}
                 {matchedCategories.length > 0 && (
-                  <div style={{ marginBottom: "12px" }}>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontSize: "0.85rem",
-                      fontWeight: "700",
-                      color: "#eab308",
-                      padding: "6px 12px",
-                      marginBottom: "6px"
-                    }}>
+                  <div className={styles.dropdownSection}>
+                    <div className={styles.dropdownSectionHeader} style={{ color: "#eab308" }}>
                       <span>🗂️</span>
                       <span>الفئات والأنشطة</span>
                     </div>
 
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", padding: "0 6px" }}>
+                    <div className={styles.categoryPillGroup}>
                       {matchedCategories.map((cat) => (
                         <Link
                           key={cat.name}
                           href={`/places?category=${cat.name}`}
                           onClick={() => setIsDropdownOpen(false)}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "6px 12px",
-                            borderRadius: "var(--ra-full)",
-                            backgroundColor: "var(--hoverBtn)",
-                            border: "1px solid var(--border-glass)",
-                            textDecoration: "none",
-                            color: "var(--color-foreground)",
-                            fontSize: "0.85rem"
-                          }}
+                          className={styles.categoryPill}
                         >
-                          <Image src={`/images/icons3d/${cat.image}`} alt={cat.label || cat.name} width={20} height={20} style={{ width: "20px", height: "auto" }} />
+                          <Image
+                            src={`/images/icons3d/${cat.image}`}
+                            alt={cat.label || cat.name}
+                            width={18}
+                            height={18}
+                            style={{ width: "18px", height: "auto" }}
+                          />
                           <span>{cat.label}</span>
                         </Link>
                       ))}
@@ -1194,50 +935,43 @@ export default function HomePage() {
 
                 {/* NO RESULTS FALLBACK */}
                 {!hasResults && (
-                  <div style={{
-                    padding: "20px 16px",
-                    textAlign: "center",
-                    color: "var(--text-secondary)",
-                    fontFamily: "var(--font-body)"
-                  }}>
-                    <div style={{ fontSize: "2rem", marginBottom: "6px" }}>
-                      <FaInbox style={{ fontSize: "2rem", marginBottom: "6px" }} />
+                  <div className={styles.dropdownNoResults}>
+                    <div style={{ fontSize: "2rem", marginBottom: "8px", color: "var(--text-muted)" }}>
+                      <FaInbox />
                     </div>
                     <div style={{ fontWeight: "700", fontSize: "1rem", color: "var(--color-foreground)", marginBottom: "4px" }}>
                       عفواً، لا توجد نتائج مطابقة لـ &quot;{searchQuery}&quot;
                     </div>
-                    <div style={{ fontSize: "0.82rem", marginBottom: "14px", color: "var(--text-secondary)" }}>
-                      لم نجد نتائج مطابقة مباشرة في الدليل. يمكنك تجربة التالي:
+                    <div style={{ fontSize: "0.85rem", marginBottom: "16px", color: "var(--text-secondary)" }}>
+                      يمكنك تجربة الاستعانة بمخطط الرحلات الذكي أو اقتراح المكان لإضافته:
                     </div>
                     <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
                       <button
                         type="button"
                         onClick={() => setSearchQuery("")}
                         style={{
-                          padding: "6px 14px",
+                          padding: "7px 14px",
                           borderRadius: "8px",
-                          backgroundColor: "var(--hoverBtn)",
-                          border: "1px solid var(--border-glass)",
+                          backgroundColor: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.12)",
                           color: "var(--color-foreground)",
-                          fontSize: "0.82rem",
-                          cursor: "pointer",
-                          fontFamily: "var(--font-sub)"
+                          fontSize: "0.85rem",
+                          cursor: "pointer"
                         }}
                       >
-                        🔄 مسح البحث
+                        مسح البحث
                       </button>
                       <Link
                         href="/ai-planner"
                         onClick={() => setIsDropdownOpen(false)}
                         style={{
-                          padding: "10px 14px",
+                          padding: "7px 14px",
                           borderRadius: "8px",
                           backgroundColor: "#8b5cf6",
                           color: "#ffffff",
-                          fontSize: "0.82rem",
+                          fontSize: "0.85rem",
                           textDecoration: "none",
-                          fontWeight: "700",
-                          fontFamily: "var(--font-sub)"
+                          fontWeight: "700"
                         }}
                       >
                         مخطط الرحلات الذكي
@@ -1246,112 +980,78 @@ export default function HomePage() {
                         href="/propose-place"
                         onClick={() => setIsDropdownOpen(false)}
                         style={{
-                          padding: "6px 14px",
+                          padding: "7px 14px",
                           borderRadius: "8px",
-                          backgroundColor: "var(--hoverBtn)",
+                          backgroundColor: "rgba(0, 111, 238, 0.12)",
                           border: "1px solid var(--color-primary)",
                           color: "var(--color-primary)",
-                          fontSize: "0.82rem",
+                          fontSize: "0.85rem",
                           textDecoration: "none",
-                          fontWeight: "700",
-                          fontFamily: "var(--font-sub)"
+                          fontWeight: "700"
                         }}
                       >
-                        ➕ اقتراح مكان
+                        اقتراح مكان جديد
                       </Link>
                     </div>
                   </div>
                 )}
 
-                {/* 4. FULL SEARCH BUTTON AT BOTTOM */}
+                {/* 4. FULL SEARCH BUTTON */}
                 <button
                   type="button"
                   onClick={(e) => handleSearchSubmit(e, true)}
-                  style={{
-                    width: "100%",
-                    marginTop: "8px",
-                    padding: "var(--padding-btn)",
-                    borderRadius: "var(--ra-full)",
-                    backgroundColor: "var(--color-primary)",
-                    color: "#ffffff",
-                    border: "none",
-                    fontWeight: "700",
-                    fontSize: "0.9rem",
-                    fontFamily: "var(--font-sub)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px"
-                  }}
+                  className={styles.dropdownFullSearchBtn}
                 >
                   <FaSearch style={{ fontSize: "0.85rem" }} />
                   <span>عرض كافة النتائج لـ &quot;{searchQuery}&quot;</span>
                 </button>
-
               </div>
             )}
           </div>
 
           {/* Quick tags */}
-          <div style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "10px",
-            maxWidth: "800px",
-            margin: "0 auto 40px auto"
-          }}>
+          <div className={styles.quickTagsList}>
             {quickSearchTags.map((tag, idx) => (
               <button
                 key={idx}
+                type="button"
                 onClick={() => {
                   if (tag.route) {
                     router.push(tag.route);
                   }
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "6px 14px",
-                  borderRadius: "var(--ra-full)",
-                  backgroundColor: "var(--hoverBtn)",
-                  border: "1px solid var(--border-glass)",
-                  color: "var(--text-secondary)",
-                  fontSize: "0.85rem",
-                  fontFamily: "var(--font-body)",
-                  cursor: "pointer",
-                  transition: "var(--transition-fast)"
-                }}
+                className={styles.quickTagChip}
               >
-                <Image src={`/images/icons2d/${tag.icon}`} alt={tag.label} width={18} height={18} style={{ width: "18px", height: "18px", objectFit: "contain" }} />
+                <Image
+                  src={`/images/icons2d/${tag.icon}`}
+                  alt={tag.label}
+                  width={18}
+                  height={18}
+                  style={{ width: "18px", height: "18px", objectFit: "contain" }}
+                />
                 <span>{tag.label}</span>
               </button>
             ))}
           </div>
 
           {/* Cairo Weather & Comfort Tip Widget */}
-          <div style={{ maxWidth: "720px", margin: "0 auto 30px auto" }}>
+          <div className={styles.weatherWidgetWrapper}>
             <WeatherComfortWidget />
           </div>
 
-          {/* ── SPONSORED AD SLIDER BANNER ── */}
-          <div style={{ marginTop: "50px" }}>
+          {/* Sponsored Ad Slider Banner */}
+          <div className={styles.adSliderWrapper}>
             <AdSlider />
           </div>
         </div>
       </section>
 
-      {/* ── 2. FAMOUS CITIES SECTION (المدن الشهيرة - سلايدر بنقط تنقل) ── */}
-      <section style={{ padding: "60px 20px 40px 20px", maxWidth: "1200px", margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: "28px" }}>
-
-          <h2 style={{ fontSize: "2rem", fontWeight: "800", margin: "0 0 8px 0", color: "var(--color-foreground)" }}>
-            المدن الشهيرة
-          </h2>
-          <p className="sub-title" style={{ color: "var(--text-secondary)", fontSize: "1rem", maxWidth: "650px", margin: "0 auto", lineHeight: "1.6" }}>
-            اسحب أفقياً أو انقر على النقط بالأسفل لاستكشاف المدن ومعالمها السياحية القريبة.
+      {/* ── 2. FAMOUS CITIES SECTION (المدن الشهيرة) ── */}
+      <section className={styles.citiesSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>مدن ومعالم مصر الشهيرة</h2>
+          <p className={styles.sectionSubtitle}>
+            استكشف المدن السياحية والحيوية ومعالمها القريبة مع تفاصيل الطقس وأهم المحطات.
           </p>
         </div>
 
@@ -1363,18 +1063,8 @@ export default function HomePage() {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
-          style={{
-            display: "flex",
-            gap: "20px",
-            overflowX: "auto",
-            scrollSnapType: isMouseDown ? "none" : "x mandatory",
-            padding: "8px 4px 16px 4px",
-            scrollBehavior: isMouseDown ? "auto" : "smooth",
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            cursor: isMouseDown ? "grabbing" : "grab",
-            userSelect: "none",
-          }}
+          className={styles.citiesSliderTrack}
+          style={{ cursor: isMouseDown ? "grabbing" : "grab" }}
         >
           {famousCities.map((city) => (
             <div
@@ -1384,156 +1074,74 @@ export default function HomePage() {
                   setSelectedCityModal(city);
                 }
               }}
-              style={{
-                flex: "0 0 210px",
-                minWidth: "260px",
-                height: "150px",
-                borderRadius: "16px",
-                overflow: "hidden",
-                cursor: "pointer",
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                scrollSnapAlign: "start",
-                position: "relative",
-                userSelect: "none",
+              className={styles.cityCard}
+              role="button"
+              tabIndex={0}
+              aria-label={`عرض تفاصيل مدينة ${city.name}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setSelectedCityModal(city);
+                }
               }}
             >
-              {/* Cover image */}
               <img
                 src={city.cover_image}
                 alt={city.name}
                 draggable={false}
-                style={{ width: "100%", height: "100%", objectFit: "cover", userSelect: "none" }}
+                className={styles.cityCardImage}
               />
-
-              {/* Gradient dark overlay */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.4) 100%)",
-                }}
-              />
-
-              {/* City Name centered on top of image */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                  padding: "20px",
-                  zIndex: 2,
-                }}
-              >
-                <h2
-                  style={{
-                    fontSize: "2.2rem",
-                    fontWeight: "900",
-                    color: "#ffffff",
-                    margin: 0,
-                    textShadow: "0 4px 15px rgba(0, 0, 0, 0.9)",
-                    letterSpacing: "-0.5px",
-                  }}
-                >
-                  {city.name}
-                </h2>
+              <div className={styles.cityCardScrim} />
+              <div className={styles.cityCardBody}>
+                <h3 className={styles.cityCardName}>{city.name}</h3>
+                {city.landmarks && city.landmarks.length > 0 && (
+                  <span className={styles.cityCardMeta}>
+                    <FaMapMarkerAlt style={{ fontSize: "0.7rem", color: "var(--color-primary)" }} />
+                    <span>{city.landmarks.length} معالم مسجلة</span>
+                  </span>
+                )}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Centered Dot Indicators & Arrow Buttons */}
+        {/* Carousel Navigation Arrows & Indicators */}
         {famousCities.length > 1 && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "16px",
-            marginTop: "16px"
-          }}>
-            {/* Right/Prev Arrow (in RTL, Right arrow scrolls right) */}
+          <div className={styles.sliderControls}>
             <button
               onClick={scrollPrev}
               type="button"
               disabled={!canScrollPrev}
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                backgroundColor: "var(--bg-glass-card)",
-                border: "1px solid var(--border-glass-bright)",
-                color: "var(--color-foreground)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: canScrollPrev ? "pointer" : "not-allowed",
-                opacity: canScrollPrev ? 1 : 0.4,
-                pointerEvents: canScrollPrev ? "auto" : "none",
-                transition: "opacity 0.2s ease, transform 0.2s ease",
-                outline: "none"
-              }}
-              onMouseEnter={(e) => { if (canScrollPrev) e.currentTarget.style.opacity = "0.85"; }}
-              onMouseLeave={(e) => { if (canScrollPrev) e.currentTarget.style.opacity = "1"; }}
-              aria-label="السابق"
+              className={styles.sliderArrowBtn}
+              aria-label="المدينة السابقة"
             >
               <FaChevronRight style={{ fontSize: "0.85rem" }} />
             </button>
 
-            {/* Dots */}
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <div className={styles.sliderDotsGroup}>
               {famousCities.map((_, idx) => {
                 const activeIndex = Math.min(
                   famousCities.length - 1,
                   Math.max(0, Math.round(citiesScrollProgress * (famousCities.length - 1)))
                 );
+                const isActive = idx === activeIndex;
                 return (
                   <button
                     key={idx}
                     onClick={() => scrollToCity(idx)}
                     type="button"
-                    style={{
-                      width: idx === activeIndex ? "20px" : "8px",
-                      height: "8px",
-                      borderRadius: "999px",
-                      backgroundColor: idx === activeIndex ? "var(--color-primary)" : "var(--text-muted)",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      padding: 0
-                    }}
+                    className={`${styles.sliderDot} ${isActive ? styles.sliderDotActive : styles.sliderDotInactive}`}
                     aria-label={`الذهاب إلى المدينة ${idx + 1}`}
                   />
                 );
               })}
             </div>
 
-            {/* Left/Next Arrow (in RTL, Left arrow scrolls left) */}
             <button
               onClick={scrollNext}
               type="button"
               disabled={!canScrollNext}
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                backgroundColor: "var(--bg-glass-card)",
-                border: "1px solid var(--border-glass-bright)",
-                color: "var(--color-foreground)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: canScrollNext ? "pointer" : "default",
-                opacity: canScrollNext ? 1 : 0.4,
-                pointerEvents: canScrollNext ? "auto" : "none",
-                transition: "opacity 0.2s ease, transform 0.2s ease",
-                outline: "none"
-              }}
-              onMouseEnter={(e) => { if (canScrollNext) e.currentTarget.style.opacity = "0.85"; }}
-              onMouseLeave={(e) => { if (canScrollNext) e.currentTarget.style.opacity = "1"; }}
-              aria-label="التالي"
+              className={styles.sliderArrowBtn}
+              aria-label="المدينة التالية"
             >
               <FaChevronLeft style={{ fontSize: "0.85rem" }} />
             </button>
@@ -1541,86 +1149,44 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* ── 3. MAIN SERVICES GRID ── */}
-      <section
-        style={{
-          padding: "10px 20px 70px 20px",
-          maxWidth: "1200px",
-          margin: "0 auto"
-        }}>
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "48px"
-          }}>
-          <h2 style={{ fontSize: "2rem", fontWeight: "500", marginBottom: "12px" }}>
-            جميع خدمات ماب القاهرة بين يديك
-          </h2>
-          <p className="sub-title" style={{ color: "var(--text-secondary)", fontSize: "1.2rem", maxWidth: "600px", margin: "0 auto" }}>
-            اختر الخدمة التي تحتاجها للوصول السريع إلى أدق التفاصيل والمؤشرات الحية.
+      {/* ── 3. MAIN SERVICES GRID (منظومة خدمات القاهرة) ── */}
+      <section className={styles.servicesSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>منظومة خدمات القاهرة والمواصلات</h2>
+          <p className={styles.sectionSubtitle}>
+            وصول سريع ومباشر لأدق تفاصيل النقل، أرقام الخدمات، وأدوات التنقل الذكية في العاصمة.
           </p>
         </div>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: "24px"
-        }}>
+        <div className={styles.servicesGrid}>
           {mainServices.map((service) => (
             <Link
               key={service.id}
               href={service.link}
-              className="glass-card"
-              style={{
-                textDecoration: "none",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                padding: "28px",
-                backgroundColor: "var(--bg-glass-card)",
-                transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                position: "relative",
-                overflow: "hidden"
-              }}
+              className={styles.serviceCard}
             >
               <div>
-                {/* Header icon & badge */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-                  <div style={{
-                    width: "54px",
-                    height: "54px",
-                    borderRadius: "var(--ra-18)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}>
+                <div className={styles.serviceCardTop}>
+                  <div className={styles.serviceCardIconWrapper}>
                     <Image
                       src={`/images/icons3d/${service.icon}.png`}
                       alt={service.title}
-                      width={80}
-                      height={80}
-                      style={{ width: "80px", height: "auto" }}
+                      width={44}
+                      height={44}
+                      style={{ width: "44px", height: "auto" }}
                     />
                   </div>
+                  {service.badge && (
+                    <span className={styles.serviceCardBadge}>{service.badge}</span>
+                  )}
                 </div>
 
-                <h2 style={{ fontSize: "1.3rem", fontWeight: "600", color: "var(--color-foreground)", marginBottom: "10px" }}>
-                  {service.title}
-                </h2>
-                <p style={{ fontSize: "0.95rem", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "24px" }}>
-                  {service.desc}
-                </p>
+                <h3 className={styles.serviceCardTitle}>{service.title}</h3>
+                <p className={styles.serviceCardDesc}>{service.desc}</p>
               </div>
 
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "0.95rem",
-                fontWeight: "700",
-                color: "var(--color-primary)",
-              }}>
-                <span style={{ fontFamily: "var(--font-display)" }}>الانتقال للخدمة</span>
+              <div className={styles.serviceCardAction}>
+                <span>الانتقال للخدمة</span>
                 <FaArrowLeft style={{ fontSize: "0.8rem" }} />
               </div>
             </Link>
@@ -1628,45 +1194,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 4. BROWSE BY CATEGORY PREVIEW ── */}
-      <section style={{
-        padding: "60px 20px",
-        paddingTop: "20px",
-        backgroundColor: "var(--bg-secondary)",
-        borderTop: "1px solid var(--border-glass)",
-        borderBottom: "1px solid var(--border-glass)"
-      }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "36px", flexWrap: "wrap", gap: "16px" }}>
-            <div>
-              <h2 style={{ fontSize: "1.8rem", fontWeight: "500", marginBottom: "8px", textAlign: "center" }}>
-                تصفّح حسب الفئة في دليل الأماكن و المرافق
-              </h2>
-              <p className="sub-title" style={{ fontSize: "0.95rem", color: "var(--text-secondary)", textAlign: "center" }}>
-                اختر الفئة للاطلاع على كافة الفروع، المواعيد، وتقييمات الزوار
-              </p>
-            </div>
+      {/* ── 4. BROWSE BY CATEGORY PREVIEW (تصفح حسب الفئة) ── */}
+      <section className={styles.categorySection}>
+        <div className={styles.categoryContainer}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>تصفّح حسب الفئة في دليل الأماكن</h2>
+            <p className={styles.sectionSubtitle}>
+              اختر الفئة للاطلاع على المواعيد، الفروع، وأرقام الهواتف المعتمدة.
+            </p>
           </div>
 
-          <div className="home-category-grid">
+          <div className={styles.categoryGrid}>
             {categoryCards.map((cat) => (
               <Link
                 key={cat.name}
                 href={`/places?category=${cat.name}`}
-                className="home-category-card"
+                className={styles.categoryTile}
               >
-                <div
-                  className="home-category-card-icon"
-                  style={{
-                  }}
-                >
-                  <Image src={`/images/icons3d/${cat.image}`} alt={cat.label} width={40} height={40} style={{ width: "40px", height: "auto" }} />
+                <div className={styles.categoryTileIcon}>
+                  <Image
+                    src={`/images/icons3d/${cat.image}`}
+                    alt={cat.label}
+                    width={36}
+                    height={36}
+                    style={{ width: "36px", height: "auto" }}
+                  />
                 </div>
                 <div>
-                  <h5 className="home-category-card-title">
-                    {cat.label}
-                  </h5>
-                  <span style={{ fontFamily: "var(--font-sub)" }} className="home-category-card-count">
+                  <h4 className={styles.categoryTileTitle}>{cat.label}</h4>
+                  <span className={styles.categoryTileCount}>
                     {categoryCounts[cat.name] || 0} مكان
                   </span>
                 </div>
@@ -1676,170 +1232,91 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 5. BLOG & ARTICLES PREVIEW SECTION ── */}
-      <section style={{ padding: "60px 20px", paddingTop: "0", maxWidth: "1100px", margin: "0 auto" }}>
-        <div style={{
-          borderRadius: "20px",
-          padding: "36px 28px",
-          position: "relative",
-          overflow: "hidden"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
-            <div>
-              <h2 style={{ fontSize: "1.75rem", fontWeight: "700", margin: "0 0 6px 0", color: "var(--color-foreground)", textAlign: "center" }}>
-                مدونة ومقالات خريطة القاهرة
-              </h2>
-              <p className="sub-title" style={{ color: "var(--text-secondary)", fontSize: "0.95rem", margin: 0 }}>
-                استكشف نصائح الترانزيت، خطوط السفر اليومية، وأفضل أماكن الخروج المحدثة.
-              </p>
-            </div>
+      {/* ── 5. BLOG & ARTICLES PREVIEW SECTION (المدونة) ── */}
+      <section className={styles.blogSection}>
+        <div className={styles.blogHeaderRow}>
+          <div>
+            <h2 className={styles.sectionTitle} style={{ textAlign: "right" }}>
+              مدونة ومقالات خريطة القاهرة
+            </h2>
+            <p className={styles.sectionSubtitle} style={{ textAlign: "right", margin: 0 }}>
+              أحدث نصائح الترانزيت، خطوط السفر اليومية، وأفضل أماكن الخروج المحدثة.
+            </p>
+          </div>
 
+          <Link href="/blog" className={styles.browseAllBlogBtn}>
+            <span>تصفح جميع المقالات</span>
+            <FaArrowLeft style={{ fontSize: "0.8rem" }} />
+          </Link>
+        </div>
+
+        <div className={styles.blogArticlesGrid}>
+          {homeBlogs.map((post) => (
             <Link
-              href="/blog"
-              className="btn-primary "
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 22px",
-                borderRadius: "var(--ra-18)",
-                backgroundColor: "var(--color-secondary)",
-                color: "#ffffffff",
-                fontWeight: "700",
-                fontSize: "0.9rem",
-                fontFamily: "var(--font-body)",
-                textDecoration: "none",
-                transition: "opacity 0.2s ease",
-              }}
+              key={post.id}
+              href={`/blog/${encodeURIComponent(post.slug || post.id)}`}
+              className={styles.blogCard}
             >
-              <span style={{ fontFamily: "var(--font-display)" }}>تصفح جميع المقالات والمدونة</span>
-              <FaArrowLeft style={{ fontSize: "0.8rem" }} />
-            </Link>
-          </div>
-
-          {/* Quick featured article cards */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "16px",
-            marginTop: "20px"
-          }}>
-            {homeBlogs.map((post) => (
-              <Link
-                key={post.id}
-                href={`/blog/${encodeURIComponent(post.slug || post.id)}`}
-                style={{
-                  textDecoration: "none",
-                  backgroundColor: "var(--color-bg)",
-                  border: "1px solid var(--border-glass)",
-                  borderRadius: "var(--cardGlassRadius)",
-                  padding: "18px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  transition: "transform 0.2s ease, border-color 0.2s ease",
-                  boxShadow: "var(--cardGlassShadow)"
-                }}
-              >
-                <div>
-                  <span style={{ fontSize: "0.78rem", color: "var(--color-secondary)", fontWeight: "700", display: "block", marginBottom: "6px", fontFamily: "var(--font-body)" }}>
-                    {post.category || "مقالات خريطة القاهرة"}
-                  </span>
-                  <h2 style={{ fontSize: "0.98rem", fontWeight: "700", color: "var(--color-foreground)", margin: "0 0 8px 0", lineHeight: "1.45" }}>
-                    {post.title}
-                  </h2>
-                  {post.excerpt && (
-                    <p style={{ fontSize: "0.83rem", color: "var(--text-secondary)", margin: "0 0 8px 0", lineHeight: "1.5", opacity: 0.9, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                      {post.excerpt}
-                    </p>
-                  )}
-                </div>
-                <span className="sub-title" style={{ fontSize: "0.82rem", color: "var(--color-secondary)", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", marginTop: "12px" }}>
-                  <span>قراءة المقال</span>
-                  <FaChevronLeft style={{ fontSize: "0.7rem" }} />
+              <div>
+                <span className={styles.blogCardCategory}>
+                  {post.category || "مقالات خريطة القاهرة"}
                 </span>
-              </Link>
-            ))}
-          </div>
+                <h3 className={styles.blogCardTitle}>{post.title}</h3>
+                {post.excerpt && (
+                  <p className={styles.blogCardExcerpt}>{post.excerpt}</p>
+                )}
+              </div>
+              <span className={styles.blogCardAction}>
+                <span>قراءة المقال</span>
+                <FaChevronLeft style={{ fontSize: "0.7rem" }} />
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* ── 6. AI PLANNER BANNER ── */}
-      <section style={{ maxWidth: "100%", margin: "0 auto", backgroundColor: "var(--bg-secondary)", borderBottom: "1px solid var(--border-glass)", }}>
-        <div style={{
-          borderTop: "1px solid var(--border-glass)",
-          padding: "48px 2px",
-          textAlign: "center",
-          position: "relative",
-          overflow: "hidden"
-        }}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "20px"
-          }}>
-            <Image src="/images/icons3d/robot.webp" alt="الذكاء الاصطناعي لماب القاهرة" width={80} height={80} style={{ width: "80px", height: "auto" }} />
+      {/* ── 6. AI PLANNER SPOTLIGHT (مخطط الرحلات الذكي) ── */}
+      <section className={styles.aiSection}>
+        <div className={styles.aiContainer}>
+          <div className={styles.aiRobotIcon}>
+            <Image
+              src="/images/icons3d/robot.webp"
+              alt="الذكاء الاصطناعي لماب القاهرة"
+              width={72}
+              height={72}
+              style={{ width: "72px", height: "auto" }}
+            />
           </div>
 
-          <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "8px 16px", color: "var(--color-foreground)" }}>
+          <h2 className={styles.aiTitle}>
             محتار تخرج فين النهاردة؟ اترك التخطيط للذكاء الاصطناعي!
           </h2>
-          <p className="sub-title" style={{ fontSize: "1rem", color: "var(--text-secondary)", margin: "0 8px 28px 8px", lineHeight: "1.7", textAlign: "center" }}>
-            حدد ميزانيتك، عدد الأفراد، والمنطقة المفضلة، وسيقوم المساعد الذكي بتنسيق برنامج يومك بالكامل مع أماكن الأكل والكافيهات والمواصلات المناسبة.
+          <p className={styles.aiSubtitle}>
+            حدد ميزانيتك، عدد الأفراد، والمنطقة المفضلة، وسيقوم المساعد الذكي بتنسيق برنامج يومك بالكامل مع أفضل المطاعم والكافيهات والمواصلات المناسبة.
           </p>
 
-          <Link
-            href="/ai-planner"
-            className="btn btn-primary"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "10px",
-              fontWeight: "700",
-              fontSize: "1rem",
-              textDecoration: "none",
-            }}
-          >
-            <span className="sub-title">جرب مخطط الرحلات الذكي </span>
-            <FaArrowLeft style={{ fontSize: "0.9rem" }} />
+          <Link href="/ai-planner" className={styles.aiCtaBtn}>
+            <span>جرب مخطط الرحلات الذكي مجاناً</span>
+            <FaArrowLeft style={{ fontSize: "0.85rem" }} />
           </Link>
         </div>
       </section>
 
-      {/* ── 6. PROPOSE PLACE CTA ── */}
-      <section style={{
-        padding: "60px 20px",
-        backgroundColor: "var(--color-bg)",
-        borderTop: "1px solid var(--border-glass)",
-        textAlign: "center"
-      }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "1.6rem", fontWeight: "800", marginBottom: "12px" }}>
-            هل تملك نشاطاً تجارياً أو تريد إضافة مكان جديد؟
-          </h2>
-          <p className="sub-title" style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>
-            ساهم معنا في تحديث دليل ماب القاهرة وأضف محلّك أو مكانك المفضّل مجاناً ليصل إلى آلاف الزوار.
-          </p>
-          <Link
-            href="/propose-place"
-            className="btn btn-outline"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "10px",
-              fontWeight: "700",
-              fontSize: "0.95rem",
-              textDecoration: "none"
-            }}
-          >
-            <FaPlusCircle />
-            <span className="sub-title">اقتراح أو إضافة مكان جديد</span>
-          </Link>
-        </div>
+      {/* ── 7. PROPOSE PLACE CTA (إضافة مكان جديد) ── */}
+      <section className={styles.proposeSection}>
+        <h2 className={styles.proposeTitle}>
+          هل تملك نشاطاً تجارياً أو تريد إضافة مكان جديد؟
+        </h2>
+        <p className={styles.proposeSubtitle}>
+          ساهم معنا في إثراء دليل ماب القاهرة وأضف نشاطك أو مكانك المفضّل مجاناً ليصل إلى آلاف الزوار والمهتمين يومياً.
+        </p>
+        <Link href="/propose-place" className={styles.proposeCtaBtn}>
+          <FaPlusCircle />
+          <span>اقتراح أو إضافة مكان جديد</span>
+        </Link>
       </section>
 
-      {/* Render City Detail Modal when a city card is clicked */}
+      {/* City Detail Modal */}
       {selectedCityModal && (
         <CityDetailModal
           city={selectedCityModal}

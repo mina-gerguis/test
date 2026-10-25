@@ -28,6 +28,21 @@
   z-index: 0;
 }
 
+.heroAtmosphere {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 960px;
+  height: 520px;
+  background: radial-gradient(ellipse 700px 320px at 50% 25%, rgba(0, 111, 238, 0.16), rgba(139, 92, 246, 0.08) 55%, transparent 75%);
+  filter: blur(48px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+}
+
 /* ─────────────────────────────────────────────────────────────
    1. HERO SECTION
    ───────────────────────────────────────────────────────────── */
@@ -83,7 +98,7 @@
   box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .searchBar:hover {
@@ -134,7 +149,7 @@
   padding: 5px 9px;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .shortcutBadge:hover {
@@ -336,7 +351,7 @@
   font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   user-select: none;
 }
 
@@ -496,7 +511,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .sliderArrowBtn:hover:not(:disabled) {
@@ -567,7 +582,7 @@
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .serviceCard:hover {
@@ -688,7 +703,7 @@
   align-items: center;
   text-align: center;
   gap: 10px;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s ease, border-color 0.22s ease;
 }
 
 .categoryTile:hover {
@@ -757,7 +772,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: all 0.22s ease;
+  transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .blogCard:hover {
@@ -822,7 +837,7 @@
   text-decoration: none;
   font-weight: 700;
   font-size: 0.9rem;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .browseAllBlogBtn:hover {
@@ -890,7 +905,7 @@
   font-weight: 700;
   font-size: 1rem;
   box-shadow: 0 8px 24px -4px rgba(139, 92, 246, 0.4);
-  transition: all 0.22s ease;
+  transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .aiCtaBtn:hover {
@@ -937,7 +952,7 @@
   text-decoration: none;
   font-weight: 700;
   font-size: 0.95rem;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .proposeCtaBtn:hover {

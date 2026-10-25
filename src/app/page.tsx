@@ -35,6 +35,8 @@ import dynamic from "next/dynamic";
 import AdSlider from "@/components/AdSlider";
 import { FamousCity, INITIAL_FAMOUS_CITIES, getStoredCities, saveStoredCities } from "@/data/cities";
 import CityDetailModal from "@/components/cities/CityDetailModal";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./home.module.css";
 
 const WeatherComfortWidget = dynamic(() => import("@/components/WeatherComfortWidget"), { ssr: false });
@@ -308,6 +310,7 @@ const DEFAULT_HOME_BLOGS: HomeBlogItem[] = [
 
 export default function HomePage() {
   const router = useRouter();
+  const mainWrapperRef = useRef<HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -591,6 +594,279 @@ export default function HomePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // ── GSAP Choreography & ScrollTrigger Motion System ──
+  useEffect(() => {
+    if (typeof window === "undefined" || !mainWrapperRef.current) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const mm = gsap.matchMedia();
+
+    mm.add(
+      {
+        isDesktop: "(min-width: 768px)",
+        isMobile: "(max-width: 767px)",
+        reduceMotion: "(prefers-reduced-motion: reduce)",
+      },
+      (context) => {
+        const { reduceMotion, isDesktop } = context.conditions as {
+          reduceMotion: boolean;
+          isDesktop: boolean;
+        };
+
+        if (reduceMotion) {
+          // Gracefully honor prefers-reduced-motion: ensure fully visible without transforms
+          gsap.set(
+            [
+              `.${styles.heroTitle}`,
+              `.${styles.heroSubtitle}`,
+              `.${styles.searchBoxContainer}`,
+              `.${styles.quickTagChip}`,
+              `.${styles.weatherWidgetWrapper}`,
+              `.${styles.adSliderWrapper}`,
+              `.${styles.serviceCard}`,
+              `.${styles.categoryTile}`,
+              `.${styles.blogCard}`,
+              `.${styles.aiContainer}`,
+              `.${styles.proposeSection}`,
+            ],
+            { opacity: 1, y: 0, scale: 1, clearProps: "all" }
+          );
+          return;
+        }
+
+        // 1. Atmosphere Gentle Breathe
+        gsap.to(`.${styles.heroAtmosphere}`, {
+          opacity: 0.55,
+          scale: 1.06,
+          duration: 4.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        // 2. Focal Hero Entrance Sequence (Choreographed Arrival)
+        const heroTl = gsap.timeline({
+          defaults: { ease: "power3.out" },
+        });
+
+        heroTl
+          .from(`.${styles.heroTitle}`, {
+            opacity: 0,
+            y: isDesktop ? 32 : 20,
+            duration: 0.85,
+            clearProps: "transform",
+          })
+          .from(
+            `.${styles.heroSubtitle}`,
+            {
+              opacity: 0,
+              y: 20,
+              duration: 0.75,
+              clearProps: "transform",
+            },
+            "-=0.55"
+          )
+          .from(
+            `.${styles.searchBoxContainer}`,
+            {
+              opacity: 0,
+              y: 18,
+              scale: 0.98,
+              duration: 0.7,
+              clearProps: "transform",
+            },
+            "-=0.45"
+          )
+          .from(
+            `.${styles.quickTagChip}`,
+            {
+              opacity: 0,
+              y: 12,
+              scale: 0.95,
+              duration: 0.45,
+              stagger: 0.03,
+              ease: "power2.out",
+              clearProps: "transform",
+            },
+            "-=0.35"
+          )
+          .from(
+            [`.${styles.weatherWidgetWrapper}`, `.${styles.adSliderWrapper}`],
+            {
+              opacity: 0,
+              y: 18,
+              duration: 0.65,
+              stagger: 0.12,
+              ease: "power2.out",
+              clearProps: "transform",
+            },
+            "-=0.25"
+          );
+
+        // 3. Famous Cities Section
+        gsap.from(`.${styles.citiesSection} .${styles.sectionHeader}`, {
+          scrollTrigger: {
+            trigger: `.${styles.citiesSection}`,
+            start: "top 85%",
+            once: true,
+          },
+          opacity: 0,
+          y: 26,
+          duration: 0.7,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        // 4. Services Grid (Staggered Batch)
+        gsap.from(`.${styles.servicesSection} .${styles.sectionHeader}`, {
+          scrollTrigger: {
+            trigger: `.${styles.servicesSection}`,
+            start: "top 85%",
+            once: true,
+          },
+          opacity: 0,
+          y: 26,
+          duration: 0.7,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        gsap.from(`.${styles.serviceCard}`, {
+          scrollTrigger: {
+            trigger: `.${styles.servicesGrid}`,
+            start: "top 82%",
+            once: true,
+          },
+          opacity: 0,
+          y: 32,
+          scale: 0.97,
+          duration: 0.65,
+          stagger: 0.06,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        // 5. Category Directory Grid
+        gsap.from(`.${styles.categorySection} .${styles.sectionHeader}`, {
+          scrollTrigger: {
+            trigger: `.${styles.categorySection}`,
+            start: "top 85%",
+            once: true,
+          },
+          opacity: 0,
+          y: 24,
+          duration: 0.65,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        gsap.from(`.${styles.categoryTile}`, {
+          scrollTrigger: {
+            trigger: `.${styles.categoryGrid}`,
+            start: "top 84%",
+            once: true,
+          },
+          opacity: 0,
+          y: 20,
+          scale: 0.94,
+          duration: 0.5,
+          stagger: 0.03,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        // 6. Blog Articles
+        gsap.from(`.${styles.blogHeaderRow}`, {
+          scrollTrigger: {
+            trigger: `.${styles.blogSection}`,
+            start: "top 85%",
+            once: true,
+          },
+          opacity: 0,
+          y: 24,
+          duration: 0.65,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        gsap.from(`.${styles.blogCard}`, {
+          scrollTrigger: {
+            trigger: `.${styles.blogArticlesGrid}`,
+            start: "top 82%",
+            once: true,
+          },
+          opacity: 0,
+          y: 26,
+          duration: 0.6,
+          stagger: 0.08,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        // 7. AI Planner Spotlight
+        gsap.from(`.${styles.aiContainer}`, {
+          scrollTrigger: {
+            trigger: `.${styles.aiSection}`,
+            start: "top 82%",
+            once: true,
+          },
+          opacity: 0,
+          scale: 0.96,
+          y: 30,
+          duration: 0.8,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+
+        // Continuous subtle organic floating for the AI robot icon
+        gsap.to(`.${styles.aiRobotIcon}`, {
+          y: -9,
+          duration: 2.2,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        // 8. Propose Place CTA
+        gsap.from(`.${styles.proposeSection} > *`, {
+          scrollTrigger: {
+            trigger: `.${styles.proposeSection}`,
+            start: "top 85%",
+            once: true,
+          },
+          opacity: 0,
+          y: 22,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          clearProps: "transform",
+        });
+      },
+      mainWrapperRef
+    );
+
+    return () => {
+      mm.revert();
+    };
+  }, []);
+
+  // Animate dynamic city cards once loaded
+  useEffect(() => {
+    if (famousCities.length > 0 && mainWrapperRef.current) {
+      ScrollTrigger.refresh();
+      gsap.from(mainWrapperRef.current.querySelectorAll(`.${styles.cityCard}`), {
+        opacity: 0,
+        scale: 0.94,
+        x: 24,
+        stagger: 0.05,
+        duration: 0.55,
+        ease: "power2.out",
+        clearProps: "transform",
+      });
+    }
+  }, [famousCities]);
+
   const queryWords = getSearchWords(searchQuery);
 
   // فلترة خدمات الموقع المطابقة للبحث
@@ -773,9 +1049,10 @@ export default function HomePage() {
   const categoryCards = CATEGORIES_STRUCTURE;
 
   return (
-    <main className={styles.mainWrapper}>
+    <main ref={mainWrapperRef} className={styles.mainWrapper}>
       {/* ── 1. HERO SECTION ── */}
       <section className={styles.heroSection}>
+        <div className={styles.heroAtmosphere} />
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
             دليل القاهرة الذكي — كل مكان وطريق ومواصلة بدقة متناهية
